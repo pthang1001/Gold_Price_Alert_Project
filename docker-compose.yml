@@ -1,0 +1,273 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: gold-price-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-123456}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/config/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: gold-price-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # RabbitMQ Message Queue
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: gold-price-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # API Gateway (Port 8000)
+  api-gateway:
+    build:
+      context: ./backend/services/api-gateway
+      dockerfile: Dockerfile
+    container_name: gold-price-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 8000
+      SERVICE_NAME: api-gateway
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AMQP_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      PRICE_SERVICE_URL: http://price-service:3003
+      ALERT_SERVICE_URL: http://alert-service:3004
+      EMAIL_SERVICE_URL: http://email-service:3005
+      NOTIFICATION_SERVICE_URL: http://notification-service:3006
+      ADMIN_SERVICE_URL: http://admin-service:3007
+      LOGGING_SERVICE_URL: http://logging-service:3008
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # Auth Service (Port 3001)
+  auth-service:
+    build:
+      context: ./backend/services/auth
+      dockerfile: Dockerfile
+    container_name: gold-price-auth-service
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./backend/services/auth/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # User Service (Port 3002)
+  user-service:
+    build:
+      context: ./backend/services/user
+      dockerfile: Dockerfile
+    container_name: gold-price-user-service
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./backend/services/user/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # Price Service (Port 3003)
+  price-service:
+    build:
+      context: ./backend/services/price
+      dockerfile: Dockerfile
+    container_name: gold-price-price-service
+    ports:
+      - "3003:3003"
+    env_file:
+      - ./backend/services/price/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # Alert Service (Port 3004)
+  alert-service:
+    build:
+      context: ./backend/services/alert
+      dockerfile: Dockerfile
+    container_name: gold-price-alert-service
+    ports:
+      - "3004:3004"
+    env_file:
+      - ./backend/services/alert/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # Email Service (Port 3005)
+  email-service:
+    build:
+      context: ./backend/services/email
+      dockerfile: Dockerfile
+    container_name: gold-price-email-service
+    ports:
+      - "3005:3005"
+    env_file:
+      - ./backend/services/email/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # Notification Service (Port 3006)
+  notification-service:
+    build:
+      context: ./backend/services/notification
+      dockerfile: Dockerfile
+    container_name: gold-price-notification-service
+    ports:
+      - "3006:3006"
+    env_file:
+      - ./backend/services/notification/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # Admin Service (Port 3007)
+  admin-service:
+    build:
+      context: ./backend/services/admin
+      dockerfile: Dockerfile
+    container_name: gold-price-admin-service
+    ports:
+      - "3007:3007"
+    env_file:
+      - ./backend/services/admin/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+  # Logging Service (Port 3008)
+  logging-service:
+    build:
+      context: ./backend/services/logging
+      dockerfile: Dockerfile
+    container_name: gold-price-logging-service
+    ports:
+      - "3008:3008"
+    env_file:
+      - ./backend/services/logging/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - gold-price-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  gold-price-network:
+    driver: bridge
