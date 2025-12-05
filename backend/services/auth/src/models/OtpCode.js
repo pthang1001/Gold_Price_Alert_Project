@@ -1,14 +1,15 @@
 const { DataTypes } = require('sequelize');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = (sequelize) => {
   const OtpCode = sequelize.define('OtpCode', {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true
+      type: DataTypes.CHAR(36),
+      primaryKey: true,
+      defaultValue: () => uuidv4()
     },
     user_id: {
-      type: DataTypes.UUID,
+      type: DataTypes.CHAR(36),
       allowNull: true
     },
     email: {

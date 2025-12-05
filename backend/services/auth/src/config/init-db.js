@@ -75,8 +75,21 @@ const initDatabase = async () => {
     sequelize.models.TwoFASecret = TwoFASecret;
 
     // Run migrations
-    await sequelize.sync({ alter: false }); // Set to true only for development
+    await sequelize.sync({ alter: true }); // Auto-sync models with database
     logger.info('✅ Database migrations completed');
+    
+    // Insert default roles if not exist
+    const roles = ['Super Admin', 'Admin', 'User', 'Moderator'];
+    for (const roleName of roles) {
+      await Role.findOrCreate({
+        where: { name: roleName },
+        defaults: { description: `${roleName} role` }
+      });
+    }
+    logger.info('✅ Default roles created');
+
+    // Expose to global for services
+    global.db = sequelize;
 
     return sequelize;
   } catch (error) {

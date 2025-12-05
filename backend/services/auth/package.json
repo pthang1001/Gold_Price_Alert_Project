@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon --watch src src/server.js",
     "start": "node src/server.js",
+    "setup": "node src/config/setup.js",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "format": "prettier --write src/**/*.js",

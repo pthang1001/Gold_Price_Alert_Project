@@ -89,8 +89,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     networks:
       - gold-price-network
     restart: unless-stopped
@@ -109,8 +107,6 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
     networks:
       - gold-price-network
@@ -131,8 +127,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     networks:
       - gold-price-network
     restart: unless-stopped
@@ -151,8 +145,6 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
     networks:
       - gold-price-network
@@ -173,8 +165,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     networks:
       - gold-price-network
     restart: unless-stopped
@@ -193,8 +183,6 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
     networks:
       - gold-price-network
@@ -215,8 +203,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     networks:
       - gold-price-network
     restart: unless-stopped
@@ -236,8 +222,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     networks:
       - gold-price-network
     restart: unless-stopped
@@ -256,8 +240,6 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
     networks:
       - gold-price-network
