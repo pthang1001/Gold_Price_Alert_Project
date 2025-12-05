@@ -3,10 +3,27 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const { initDatabase } = require('./config/init-db');
 
 dotenv.config();
 
 const app = express();
+
+// Initialize database
+let db = null;
+initDatabase().then(database => {
+  db = database;
+  console.log('✅ Database initialized');
+}).catch(error => {
+  console.error('❌ Database initialization failed:', error);
+  process.exit(1);
+});
+
+// Make db available globally
+app.use((req, res, next) => {
+  req.db = db;
+  next();
+});
 
 // Middleware
 app.use(helmet());
@@ -25,7 +42,7 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
-app.use('/api', require('./routes'));
+app.use('/auth', require('./routes/auth'));
 
 // Error handling
 app.use((err, req, res, next) => {

@@ -25,7 +25,7 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
-app.use('/api', require('./routes'));
+app.use('/users', require('./routes/user'));
 
 // Error handling
 app.use((err, req, res, next) => {
