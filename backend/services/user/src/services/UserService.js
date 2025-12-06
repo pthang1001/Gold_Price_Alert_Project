@@ -14,7 +14,11 @@ class UserService {
    * Create user profile
    */
   static async createUserProfile(userId, profileData) {
-    const UserProfile = db.models.UserProfile;
+    const UserProfile = db.models?.UserProfile;
+
+    if (!UserProfile) {
+      throw new Error('UserProfile model not available');
+    }
 
     // Check if profile already exists
     const existing = await UserProfile.findOne({
@@ -37,7 +41,11 @@ class UserService {
    * Get user profile
    */
   static async getUserProfile(userId) {
-    const UserProfile = db.models.UserProfile;
+    const UserProfile = db.models?.UserProfile;
+
+    if (!UserProfile) {
+      throw new Error('UserProfile model not available');
+    }
 
     const profile = await UserProfile.findOne({
       where: { user_id: userId }
@@ -54,7 +62,11 @@ class UserService {
    * Update user profile
    */
   static async updateUserProfile(userId, updateData) {
-    const UserProfile = db.models.UserProfile;
+    const UserProfile = db.models?.UserProfile;
+
+    if (!UserProfile) {
+      throw new Error('UserProfile model not available');
+    }
 
     const profile = await UserProfile.findOne({
       where: { user_id: userId }
@@ -73,7 +85,18 @@ class UserService {
    * Get user preferences
    */
   static async getUserPreferences(userId) {
-    const UserPreference = db.models.UserPreference;
+    // Lazy access - get models only when needed, not at module load time
+    if (!db || !db.models) {
+      console.error('❌ Database not ready. db:', typeof db, 'db.models:', db?.models);
+      throw new Error('Database not initialized');
+    }
+
+    const UserPreference = db.models.UserPreference || db.models.UserPreferences;
+
+    if (!UserPreference) {
+      console.error('❌ UserPreference model not found. Available models:', Object.keys(db.models || {}));
+      throw new Error('UserPreference model not available');
+    }
 
     let preferences = await UserPreference.findOne({
       where: { user_id: userId }
@@ -93,7 +116,11 @@ class UserService {
    * Update user preferences
    */
   static async updateUserPreferences(userId, updateData) {
-    const UserPreference = db.models.UserPreference;
+    const UserPreference = db.models?.UserPreference || db.models?.UserPreferences;
+
+    if (!UserPreference) {
+      throw new Error('UserPreference model not available');
+    }
 
     let preferences = await UserPreference.findOne({
       where: { user_id: userId }

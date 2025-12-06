@@ -19,6 +19,7 @@ const startServer = async () => {
     console.log('✅ Database initialized');
     global.userDb = db;
 
+
     // Make db available via middleware
     app.use((req, res, next) => {
       req.db = db;

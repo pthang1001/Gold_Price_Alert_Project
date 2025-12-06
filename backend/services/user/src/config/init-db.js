@@ -38,6 +38,7 @@ const initDatabase = async () => {
     // Store models
     sequelize.models.UserProfile = UserProfile;
     sequelize.models.UserPreferences = UserPreferences;
+    sequelize.models.UserPreference = UserPreferences; // Alias for backwards compatibility
 
     // Run migrations
     await sequelize.sync({ alter: true });
