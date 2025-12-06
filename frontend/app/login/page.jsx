@@ -6,30 +6,20 @@ import { useRouter } from 'next/navigation'
 import { authApi } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 
-interface FormData {
-  email: string
-  password: string
-  rememberMe: boolean
-}
-
-interface FormErrors {
-  [key: string]: string
-}
-
 export default function LoginPage() {
   const router = useRouter()
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false,
   })
-  const [errors, setErrors] = useState<FormErrors>({})
+  const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const setAuthUser = useAuthStore((state) => state.setUser)
   const setTokens = useAuthStore((state) => state.setTokens)
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {}
+  const validateForm = () => {
+    const newErrors = {}
 
     if (!formData.email.trim()) newErrors.email = 'Email is required'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
@@ -41,7 +31,7 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validateForm()) return
 
@@ -64,7 +54,7 @@ export default function LoginPage() {
 
       // Redirect to dashboard
       router.push('/dashboard')
-    } catch (error: any) {
+    } catch (error) {
       setErrors({
         submit: error.response?.data?.message || 'Login failed. Please try again.',
       })
@@ -73,7 +63,7 @@ export default function LoginPage() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target
     setFormData((prev) => ({
       ...prev,

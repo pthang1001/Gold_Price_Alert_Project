@@ -36,7 +36,7 @@ export default function VerifyOtpPage() {
     }
   }, [resendTimer])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!otp || otp.length !== 6) {
@@ -59,7 +59,7 @@ export default function VerifyOtpPage() {
       setTimeout(() => {
         router.push('/login')
       }, 2000)
-    } catch (err: any) {
+    } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP. Please try again.')
     } finally {
       setLoading(false)
@@ -72,7 +72,7 @@ export default function VerifyOtpPage() {
       // Call resend OTP endpoint (would need to be created on backend)
       setSuccess('✓ OTP resent to your email')
       setResendTimer(60)
-    } catch (err: any) {
+    } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend OTP')
     } finally {
       setLoading(false)

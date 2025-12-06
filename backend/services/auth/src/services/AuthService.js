@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const { sendOTPEmail } = require('../config/email');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jwt-secret-key';
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-key';
@@ -19,9 +20,16 @@ class AuthService {
    * Send OTP via email
    */
   static async sendOTP(email, otpCode, type = 'email_verification') {
-    // TODO: Call Email Service to send OTP
-    console.log(`📧 OTP ${otpCode} sent to ${email} for ${type}`);
-    return true;
+    try {
+      await sendOTPEmail(email, otpCode);
+      console.log(`✅ OTP ${otpCode} sent to ${email} for ${type}`);
+      return true;
+    } catch (error) {
+      console.error(`⚠️ Failed to send OTP to ${email}:`, error.message);
+      // Don't throw - allow registration to continue even if email fails
+      console.log(`ℹ️ OTP stored but email delivery failed. Code: ${otpCode}`);
+      return false;
+    }
   }
 
   /**

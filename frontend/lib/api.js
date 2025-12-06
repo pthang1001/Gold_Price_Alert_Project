@@ -24,13 +24,13 @@ apiClient.interceptors.request.use(
 )
 
 export const authApi = {
-  register: (email: string, password: string, firstName: string, lastName: string) =>
+  register: (email, password, firstName, lastName) =>
     apiClient.post('/auth/register', { email, password, firstName, lastName }),
 
-  login: (email: string, password: string) =>
+  login: (email, password) =>
     apiClient.post('/auth/login', { email, password }),
 
-  verifyOtp: (userId: string, otpCode: string) =>
+  verifyOtp: (userId, otpCode) =>
     apiClient.post('/auth/verify-otp', { user_id: userId, otp_code: otpCode }),
 
   refreshToken: () =>
@@ -41,13 +41,13 @@ export const userApi = {
   getProfile: () =>
     apiClient.get('/users/profile'),
 
-  updateProfile: (data: Record<string, any>) =>
+  updateProfile: (data) =>
     apiClient.put('/users/profile', data),
 
   getPreferences: () =>
     apiClient.get('/users/preferences'),
 
-  updatePreferences: (data: Record<string, any>) =>
+  updatePreferences: (data) =>
     apiClient.put('/users/preferences', data),
 }
 

@@ -6,34 +6,22 @@ import { useRouter } from 'next/navigation'
 import { authApi } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
 
-interface FormData {
-  firstName: string
-  lastName: string
-  email: string
-  password: string
-  confirmPassword: string
-}
-
-interface FormErrors {
-  [key: string]: string
-}
-
 export default function RegisterPage() {
   const router = useRouter()
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
   })
-  const [errors, setErrors] = useState<FormErrors>({})
+  const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const setAuthUser = useAuthStore((state) => state.setUser)
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {}
+  const validateForm = () => {
+    const newErrors = {}
 
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required'
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required'
@@ -52,7 +40,7 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validateForm()) return
 
@@ -73,7 +61,7 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push('/verify-otp')
       }, 2000)
-    } catch (error: any) {
+    } catch (error) {
       setErrors({
         submit: error.response?.data?.message || 'Registration failed. Please try again.',
       })
@@ -82,7 +70,7 @@ export default function RegisterPage() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
