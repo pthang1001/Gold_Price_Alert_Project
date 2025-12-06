@@ -3,43 +3,74 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const { initDatabase } = require('./config/init-db');
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(helmet());
-app.use(cors());
-app.use(morgan('combined'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Initialize database and start server
+let db = null;
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK',
-    service: process.env.SERVICE_NAME,
-    timestamp: new Date()
-  });
-});
+const startServer = async () => {
+  try {
+    // Initialize database first
+    db = await initDatabase();
+    console.log('✅ Database initialized');
+    global.userDb = db;
 
-// Routes
-app.use('/users', require('./routes/user'));
+    // Make db available via middleware
+    app.use((req, res, next) => {
+      req.db = db;
+      next();
+    });
 
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    success: false,
-    message: err.message || 'Internal Server Error',
-    timestamp: new Date()
-  });
-});
+    // Middleware
+    app.use(helmet());
+    app.use(cors());
+    app.use(morgan('combined'));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    // Health check
+    app.get('/health', (req, res) => {
+      res.status(200).json({ 
+        status: 'OK',
+        service: process.env.SERVICE_NAME,
+        timestamp: new Date()
+      });
+    });
+
+    // Routes
+    const userRoutes = require('./routes/user');
+    app.use('/users', userRoutes);
+    console.log('✅ User routes loaded');
+
+    // Error handling
+    app.use((err, req, res, next) => {
+      console.error(err.stack);
+      res.status(500).json({ 
+        success: false,
+        message: err.message || 'Internal Server Error',
+        timestamp: new Date()
+      });
+    });
+
+    return true;
+  } catch (error) {
+    console.error('❌ Initialization error:', error);
+    throw error;
+  }
+};
 
 const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  console.log(`✅ ${process.env.SERVICE_NAME} running on port ${PORT}`);
+startServer().then(() => {
+  app.listen(PORT, () => {
+    console.log(`✅ ${process.env.SERVICE_NAME} running on port ${PORT}`);
+  });
+}).catch(error => {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
 });
 
 module.exports = app;

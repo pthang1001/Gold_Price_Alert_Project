@@ -3,6 +3,36 @@ const logger = require('../middleware/logger');
 
 class UserController {
   /**
+   * POST /users/profile
+   * Create user profile
+   */
+  static async createProfile(req, res, next) {
+    try {
+      const userId = req.user?.id || req.headers['x-user-id'];
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: 'Unauthorized'
+        });
+      }
+
+      const profile = await UserService.createUserProfile(userId, req.body);
+
+      res.status(201).json({
+        success: true,
+        message: 'Profile created successfully',
+        data: profile
+      });
+
+      logger.info(`Profile created for user: ${userId}`);
+    } catch (error) {
+      logger.error(`Create profile error: ${error.message}`);
+      next(error);
+    }
+  }
+
+  /**
    * GET /users/profile
    * Get user profile
    */

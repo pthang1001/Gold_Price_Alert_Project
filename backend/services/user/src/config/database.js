@@ -1,27 +1,25 @@
-const { Sequelize } = require('sequelize');
+/**
+ * Database singleton - routes requests to global.userDb
+ * The actual initialization happens in init-db.js via startServer()
+ */
 
-const sequelize = new Sequelize({
-  database: process.env.DB_NAME,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  dialect: 'mysql',
-  logging: false,
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
+module.exports = {
+  get models() {
+    if (!global.userDb) {
+      throw new Error('Database not initialized. Call initDatabase() from init-db.js first');
+    }
+    return global.userDb.models;
   },
-});
+  
+  get sequelize() {
+    if (!global.userDb) {
+      throw new Error('Database not initialized');
+    }
+    return global.userDb;
+  },
 
-sequelize.authenticate()
-  .then(() => {
-    console.log('✅ Database connected:', process.env.DB_NAME);
-  })
-  .catch((err) => {
-    console.error('❌ Database connection failed:', err.message);
-  });
-
-module.exports = sequelize;
+  // For direct access
+  getDb() {
+    return global.userDb;
+  }
+};

@@ -7,6 +7,7 @@ const router = express.Router();
  */
 
 // Profile
+router.post('/profile', UserController.createProfile);
 router.get('/profile', UserController.getProfile);
 router.put('/profile', UserController.updateProfile);
 

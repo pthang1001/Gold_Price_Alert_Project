@@ -11,6 +11,29 @@ const eventBus = {
 
 class UserService {
   /**
+   * Create user profile
+   */
+  static async createUserProfile(userId, profileData) {
+    const UserProfile = db.models.UserProfile;
+
+    // Check if profile already exists
+    const existing = await UserProfile.findOne({
+      where: { user_id: userId }
+    });
+
+    if (existing) {
+      throw new Error('User profile already exists');
+    }
+
+    const profile = await UserProfile.create({
+      user_id: userId,
+      ...profileData
+    });
+
+    return profile;
+  }
+
+  /**
    * Get user profile
    */
   static async getUserProfile(userId) {
