@@ -53,13 +53,24 @@ export default function RegisterPage() {
         formData.lastName
       )
 
+      console.log('Registration response:', response);
+      console.log('User ID from response:', response.data.data.user_id);
+
       setSuccessMessage('✓ Registration successful! OTP sent to your email.')
-      localStorage.setItem('pendingUserId', response.data.user_id)
-      localStorage.setItem('pendingEmail', formData.email)
+      
+      // Save to both localStorage and session storage
+      if (typeof window !== 'undefined') {
+        const userId = response.data.data.user_id;
+        console.log('Saving to localStorage:', { userId, email: formData.email });
+        localStorage.setItem('pendingUserId', userId)
+        localStorage.setItem('pendingEmail', formData.email)
+        sessionStorage.setItem('pendingUserId', userId)
+        sessionStorage.setItem('pendingEmail', formData.email)
+      }
 
       // Redirect to OTP verification page after 2 seconds
       setTimeout(() => {
-        router.push('/verify-otp')
+        router.push(`/verify-otp?userId=${response.data.data.user_id}&email=${encodeURIComponent(formData.email)}`)
       }, 2000)
     } catch (error) {
       setErrors({

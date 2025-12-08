@@ -1,14 +1,18 @@
 const express = require('express');
+const PriceController = require('../controller/PriceController');
 
 const router = express.Router();
 
-// Price routes
-router.get('/current', (req, res) => {
-  res.json({ message: 'Price - Get Current', service: 'price-service' });
-});
+// Get current gold price
+router.get('/current', PriceController.getCurrentPrice);
 
-router.get('/history', (req, res) => {
-  res.json({ message: 'Price - Get History' });
-});
+// Get price history
+router.get('/history', PriceController.getPriceHistory);
+
+// Get price statistics
+router.get('/statistics', PriceController.getPriceStatistics);
+
+// Refresh price (for testing)
+router.post('/refresh', PriceController.refreshPrice);
 
 module.exports = router;

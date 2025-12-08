@@ -28,7 +28,13 @@ app.use('/user', createProxyMiddleware({
   changeOrigin: true,
   timeout: 60000,
   proxyTimeout: 60000,
-  logger: console
+  logger: console,
+  pathRewrite: (path) => {
+    console.log('[Proxy] Original path:', path);
+    const newPath = path.replace(/^\/user/, '/users');
+    console.log('[Proxy] Rewritten path:', newPath);
+    return newPath;
+  }
 }));
 
 app.use('/price', createProxyMiddleware({

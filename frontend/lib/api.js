@@ -39,16 +39,16 @@ export const authApi = {
 
 export const userApi = {
   getProfile: () =>
-    apiClient.get('/users/profile'),
+    apiClient.get('/user/profile'),
 
   updateProfile: (data) =>
-    apiClient.put('/users/profile', data),
+    apiClient.put('/user/profile', data),
 
   getPreferences: () =>
-    apiClient.get('/users/preferences'),
+    apiClient.get('/user/preferences'),
 
   updatePreferences: (data) =>
-    apiClient.put('/users/preferences', data),
+    apiClient.put('/user/preferences', data),
 }
 
 export default apiClient

@@ -23,7 +23,10 @@ class AuthController {
       res.status(201).json({
         success: true,
         message: result.message,
-        data: result
+        data: {
+          user_id: result.user_id,
+          email: result.email
+        }
       });
 
       logger.info(`User registered: ${email}`);
@@ -53,7 +56,11 @@ class AuthController {
       res.status(200).json({
         success: true,
         message: result.message,
-        data: result.user
+        data: {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+          user: result.user
+        }
       });
 
       logger.info(`OTP verified for user: ${user_id}`);

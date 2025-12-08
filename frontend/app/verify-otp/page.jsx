@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { authApi } from '@/lib/api'
+import { useAuthStore } from '@/store/auth'
 
 export default function VerifyOtpPage() {
   const router = useRouter()
+  const { setTokens, setUser } = useAuthStore()
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -14,20 +16,22 @@ export default function VerifyOtpPage() {
   const [resendTimer, setResendTimer] = useState(0)
   const [userId, setUserId] = useState('')
   const [email, setEmail] = useState('')
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
+    
     // Get user ID from localStorage
     const savedUserId = localStorage.getItem('pendingUserId')
     const savedEmail = localStorage.getItem('pendingEmail')
 
-    if (!savedUserId) {
-      router.push('/register')
-      return
-    }
+    console.log('localStorage check:', { savedUserId, savedEmail });
 
-    setUserId(savedUserId)
-    setEmail(savedEmail || '')
-  }, [router])
+    if (savedUserId) {
+      setUserId(savedUserId)
+      setEmail(savedEmail || '')
+    }
+  }, [])
 
   useEffect(() => {
     if (resendTimer > 0) {
@@ -44,22 +48,50 @@ export default function VerifyOtpPage() {
       return
     }
 
+    if (!userId) {
+      setError('User ID not found. Please register again.')
+      return
+    }
+
+    console.log('Submitting OTP verification:', { userId, otp });
+
     setLoading(true)
     setError('')
 
     try {
-      await authApi.verifyOtp(userId, otp)
-      setSuccess('✓ Email verified! Redirecting to login...')
+      const response = await authApi.verifyOtp(userId, otp)
+      console.log('OTP verification response:', response.data)
+      setSuccess('✓ Email verified! Redirecting to dashboard...')
+
+      // Save tokens and user info
+      const { accessToken, refreshToken, user } = response.data.data || {}
+      console.log('Extracted tokens:', { accessToken: !!accessToken, refreshToken: !!refreshToken, user })
+      
+      if (accessToken && refreshToken) {
+        localStorage.setItem('accessToken', accessToken)
+        localStorage.setItem('refreshToken', refreshToken)
+        localStorage.setItem('user', JSON.stringify(user))
+        
+        // Update Zustand auth store
+        setTokens(accessToken, refreshToken)
+        setUser(user)
+        
+        console.log('Tokens saved to localStorage and auth store')
+        console.log('Stored accessToken:', localStorage.getItem('accessToken')?.substring(0, 20) + '...')
+      } else {
+        console.error('No tokens in response:', response.data.data)
+      }
 
       // Clear localStorage
       localStorage.removeItem('pendingUserId')
       localStorage.removeItem('pendingEmail')
 
-      // Redirect to login after 2 seconds
+      // Redirect to dashboard after 2 seconds
       setTimeout(() => {
-        router.push('/login')
+        router.push('/dashboard')
       }, 2000)
     } catch (err) {
+      console.error('OTP verification error:', err);
       setError(err.response?.data?.message || 'Invalid OTP. Please try again.')
     } finally {
       setLoading(false)

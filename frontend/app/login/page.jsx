@@ -39,17 +39,17 @@ export default function LoginPage() {
     try {
       const response = await authApi.login(formData.email, formData.password)
 
-      const { access_token, refresh_token, user } = response.data
+      const { accessToken, refreshToken, user } = response.data.data
 
       // Save tokens
-      localStorage.setItem('accessToken', access_token)
-      localStorage.setItem('refreshToken', refresh_token)
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('refreshToken', refreshToken)
       if (formData.rememberMe) {
         localStorage.setItem('rememberMe', 'true')
       }
 
       // Update auth store
-      setTokens(access_token, refresh_token)
+      setTokens(accessToken, refreshToken)
       setAuthUser(user)
 
       // Redirect to dashboard

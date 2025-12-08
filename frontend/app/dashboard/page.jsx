@@ -36,6 +36,9 @@ export default function DashboardPage() {
             <div className="text-sm text-gray-400">Price Alert</div>
           </Link>
           <div className="flex items-center gap-6">
+            <Link href="/profile" className="text-gray-300 hover:text-accent transition">
+              Profile
+            </Link>
             <span className="text-gray-300">{user?.email}</span>
             <button
               onClick={handleLogout}

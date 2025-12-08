@@ -38,7 +38,10 @@ class UserController {
    */
   static async getProfile(req, res, next) {
     try {
-      const userId = req.user?.id || req.headers['x-user-id'];
+      const userId = req.user?.id;
+      const email = req.user?.email;
+
+      console.log('🔍 getProfile called:', { userId, email });
 
       if (!userId) {
         return res.status(401).json({
@@ -47,7 +50,7 @@ class UserController {
         });
       }
 
-      const profile = await UserService.getUserProfile(userId);
+      const profile = await UserService.getUserProfile(userId, email);
 
       res.status(200).json({
         success: true,
@@ -55,6 +58,7 @@ class UserController {
       });
     } catch (error) {
       logger.error(`Get profile error: ${error.message}`);
+      console.error('❌ Full error:', error);
       next(error);
     }
   }

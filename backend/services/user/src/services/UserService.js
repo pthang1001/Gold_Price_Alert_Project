@@ -40,19 +40,33 @@ class UserService {
   /**
    * Get user profile
    */
-  static async getUserProfile(userId) {
+  static async getUserProfile(userId, email) {
+    console.log('[UserService.getUserProfile] Called with:', { userId, email });
+    
     const UserProfile = db.models?.UserProfile;
 
     if (!UserProfile) {
+      console.log('[UserService.getUserProfile] ❌ UserProfile model not available');
       throw new Error('UserProfile model not available');
     }
 
-    const profile = await UserProfile.findOne({
+    let profile = await UserProfile.findOne({
       where: { user_id: userId }
     });
 
+    console.log('[UserService.getUserProfile] Found profile:', profile ? 'Yes' : 'No');
+
+    // Create default profile if not exists
     if (!profile) {
-      throw new Error('User profile not found');
+      console.log('[UserService.getUserProfile] Creating default profile...');
+      profile = await UserProfile.create({
+        user_id: userId,
+        first_name: '',
+        last_name: '',
+        email: email || '',
+        phone: ''
+      });
+      console.log('[UserService.getUserProfile] ✅ Profile created:', profile);
     }
 
     return profile;
